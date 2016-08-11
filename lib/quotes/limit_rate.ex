@@ -13,20 +13,20 @@ defmodule Quotes.Limit_rate do
     check_limits(T, NameBot, NameChat, StartTimer)
   end
 
-  def check_limit(TypeLimit, NameBot, NameChat, StartTimer) do
+  def check_limit(type_limit, NameBot, NameChat, StartTimer) do
     Now = int_timestamp()
     Counter = case :ets.lookup(:limit_rate_all,{NameBot, Now}) do
                 [] -> 1
                 [{_, L}] -> L + 1
               end
-    NameEts = :erlang.binary_to_atom(<<"limit_rate_"/:utf8,TypeLimit/:binary>>, :utf8)
+    NameEts = :erlang.binary_to_atom("limit_rate_" <> type_limit, :utf8)
     :ets.insert(NameEts, {{NameBot, Now}, Counter})
-    {RateQuery, Sleep, LimitDie} = get_params_cheking(TypeLimit)
+    {RateQuery, Sleep, LimitDie} = get_params_cheking(type_limit)
     case Counter do
       C when C > RateQuery ->
         check_die(LimitDie, StartTimer, Now)
         :timer.sleep(Sleep)
-        check_limit(TypeBot, NameBot, NameChat, StartTimer)
+        check_limit(type_limit, NameBot, NameChat, StartTimer)
       _ ->
         :ok
     end
