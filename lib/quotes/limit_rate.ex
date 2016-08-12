@@ -5,37 +5,37 @@ defmodule Quotes.Limit_rate do
   @sleep_all 1000 ## in miliseconds
   @sleep_chat 10000 ## in miliseconds
 
-  def check_limits([], NameBot, NameChat, StartTimer ) do
+  def check_limits([], nameBot, nameChat, startTimer ) do
     :ok
   end
-  def check_limits([Limit | T], NameBot, NameChat, StartTimer) do
-    check_limit(Limit, NameBot, NameChat, StartTimer)
-    check_limits(T, NameBot, NameChat, StartTimer)
+  def check_limits([limit | t], nameBot, nameChat, startTimer) do
+    check_limit(limit, nameBot, nameChat, startTimer)
+    check_limits(t, nameBot, nameChat, startTimer)
   end
 
-  def check_limit(type_limit, NameBot, NameChat, StartTimer) do
-    Now = int_timestamp()
-    Counter = case :ets.lookup(:limit_rate_all,{NameBot, Now}) do
+  def check_limit(type_limit, nameBot, nameChat, startTimer) do
+    now = int_timestamp()
+    counter = case :ets.lookup(:limit_rate_all,{nameBot, now}) do
                 [] -> 1
                 [{_, L}] -> L + 1
               end
-    NameEts = :erlang.binary_to_atom("limit_rate_" <> type_limit, :utf8)
-    :ets.insert(NameEts, {{NameBot, Now}, Counter})
-    {RateQuery, Sleep, LimitDie} = get_params_cheking(type_limit)
-    case Counter do
-      C when C > RateQuery ->
-        check_die(LimitDie, StartTimer, Now)
-        :timer.sleep(Sleep)
-        check_limit(type_limit, NameBot, NameChat, StartTimer)
+    nameEts = :erlang.binary_to_atom("limit_rate_" <> type_limit, :utf8)
+    :ets.insert(nameEts, {{nameBot, now}, counter})
+    {rateQuery, sleep, limitDie} = get_params_cheking(type_limit)
+    case counter do
+      c when c > rateQuery ->
+        check_die(limitDie, startTimer, now)
+        :timer.sleep(sleep)
+        check_limit(type_limit, nameBot, nameChat, startTimer)
       _ ->
         :ok
     end
   end
 
-  def check_die(LimitDie, StartTimer, Now) when Now - StartTimer > LimitDie do
+  def check_die(limitDie, startTimer, now) when now - startTimer > limitDie do
                                                       raise "limit over"
   end
-  def check_die(_LimitDie, _StartTimer, _Now) do
+  def check_die(_limitDie, _startTimer, _now) do
     :ok
   end
 
@@ -53,8 +53,8 @@ defmodule Quotes.Limit_rate do
   end
 
   def int_timestamp() do
-    {Mega, Secs, _Micro} = :os.timestamp()
-    Mega * 1000000 + Secs
+    {mega, secs, _Micro} = :os.timestamp()
+    mega * 1000000 + Secs
   end
 
 end
