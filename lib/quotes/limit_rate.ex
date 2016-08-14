@@ -5,7 +5,8 @@ defmodule Quotes.Limit_rate do
   @sleep_all 1000 ## in miliseconds
   @sleep_chat 10000 ## in miliseconds
 
-  def check_limits([], nameBot, nameChat, startTimer ) do
+## use Limit_rate.check_limits([:all, :chat], "Bot1", "Chat1")
+  def check_limits([], _nameBot, _nameChat, _startTimer ) do
     :ok
   end
   def check_limits([limit | t], nameBot, nameChat, startTimer) do
@@ -15,7 +16,8 @@ defmodule Quotes.Limit_rate do
 
   def check_limit(type_limit, nameBot, nameChat, startTimer) do
     now = int_timestamp()
-    counter = case :ets.lookup(:limit_rate_all,{nameBot, now}) do
+    key_limit = get_key_limit(type_limit, nameBot, nameChat)
+    counter = case :ets.lookup(:limit_rate_all, key_limit) do
                 [] -> 1
                 [{_, L}] -> L + 1
               end
@@ -30,6 +32,13 @@ defmodule Quotes.Limit_rate do
       _ ->
         :ok
     end
+  end
+
+  def get_key_limit(:all, nameBot, _nameChat) do
+    nameBot
+  end
+  def get_key_limit(:chat, nameBot, nameChat) do
+    {nameBot, nameChat}
   end
 
   def check_die(limitDie, startTimer, now) when now - startTimer > limitDie do
@@ -53,8 +62,8 @@ defmodule Quotes.Limit_rate do
   end
 
   def int_timestamp() do
-    {mega, secs, _Micro} = :os.timestamp()
-    mega * 1000000 + Secs
+    {mega, secs, _micro} = :os.timestamp()
+    mega * 1000000 + secs
   end
 
 end

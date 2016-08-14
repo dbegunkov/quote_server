@@ -6,8 +6,8 @@ defmodule Quotes.Quoted_handler do
   end
 
   def handle(req, state) do
-    {:ok, data} = File.read "assets/index.html"
-    {:ok, req} = :cowboy_http_req.reply 200, [], data, req
+    :ok  = Quotes.Limit_rate.check_limits([:all, :chat], "Bot1", "Chat1")
+    {:ok, req} = :cowboy_http_req.reply 200, [], <<"OK, BOT">>, req
     {:ok, req, state}
   end
 
@@ -15,3 +15,4 @@ defmodule Quotes.Quoted_handler do
     :ok
   end
 end
+T
