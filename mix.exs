@@ -14,7 +14,8 @@ defmodule QuoteServer.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :quote_server]]
+    [applications: [:logger, :ranch, :cowboy]]
+    [mod: {QuoteServer, []}]
   end
 
   # Dependencies can be Hex packages:

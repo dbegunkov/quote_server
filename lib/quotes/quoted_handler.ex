@@ -7,7 +7,7 @@ defmodule Quotes.Quoted_handler do
 
   def handle(req, state) do
     :ok  = Quotes.Limit_rate.check_limits([:all, :chat], "Bot1", "Chat1")
-    {:ok, req} = :cowboy_http_req.reply 200, [], <<"OK, BOT">>, req
+    {:ok, req} = :cowboy_req.reply 200, [], <<"OK, BOT">>, req
     {:ok, req, state}
   end
 
