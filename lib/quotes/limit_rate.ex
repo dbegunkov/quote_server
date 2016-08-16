@@ -5,7 +5,7 @@ defmodule Quotes.Limit_rate do
   @sleep_all 1000 ## in miliseconds
   @sleep_chat 10000 ## in miliseconds
 
-## use Limit_rate.check_limits([:all, :chat], "Bot1", "Chat1")
+## use Quotes.Limit_rate.check_limits([""all"", ""chat"], "Bot1", "Chat1", Quotes.Limit_rate.int_timestamp())
   def check_limits([], _nameBot, _nameChat, _startTimer ) do
     :ok
   end
@@ -16,14 +16,17 @@ defmodule Quotes.Limit_rate do
 
   def check_limit(type_limit, nameBot, nameChat, startTimer) do
     now = int_timestamp()
-    key_limit = get_key_limit(type_limit, nameBot, nameChat)
+    type_limit_atom = :erlang.binary_to_atom(type_limit, :utf8)
+    key_limit = get_key_limit(type_limit_atom, nameBot, nameChat)
+    nameEts = :erlang.binary_to_atom("limit_rate_" <> type_limit, :utf8)
     counter = case :ets.lookup(:limit_rate_all, key_limit) do
                 [] -> 1
                 [{_, L}] -> L + 1
               end
-    nameEts = :erlang.binary_to_atom("limit_rate_" <> type_limit, :utf8)
-    :ets.insert(nameEts, {{nameBot, now}, counter})
-    {rateQuery, sleep, limitDie} = get_params_cheking(type_limit)
+    # :ets.insert(nameEts, {{nameBot, now}, counter})
+    :ets.insert(:limit_rate_all, {1,2,3})
+    IO.pust "inserted!!!"
+    {rateQuery, sleep, limitDie} = get_params_cheking(type_limit_atom)
     case counter do
       c when c > rateQuery ->
         check_die(limitDie, startTimer, now)
